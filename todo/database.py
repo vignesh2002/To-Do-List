@@ -4,7 +4,6 @@
 import configparser
 import json
 from pathlib import Path
-from tkinter.ttk import _TreeviewColumnId
 from typing import Any, Dict, List, NamedTuple
 
 from todo import DB_READ_ERROR, DB_WRITE_ERROR, JSON_ERROR, SUCCESS
