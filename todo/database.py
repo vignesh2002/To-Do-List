@@ -47,7 +47,7 @@ class DatabaseHandler:                                                          
     def write_todos(self, todo_list: List[Dict[str, Any]]) -> DBResponse:           # takes a list of to-do dictionaries and writes them to the database
         try:                                                                        # try...except block to catch errors while opening the database
             with self._db_path.open("w") as db:                                     # opens the database in "w" - write format
-                json.dump(todo_list, db, ident=4)                                   # dumps the to-do list as JSON content into the database
+                json.dump(todo_list, db, indent=4)                                  # dumps the to-do list as JSON content into the database
             return DBResponse(todo_list, SUCCESS)                                   # returns a DBResponse instance holding the to-do list and the SUCCESS code.
         except OSError:
             return DBResponse(todo_list, DB_WRITE_ERROR)

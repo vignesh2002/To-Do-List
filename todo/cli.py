@@ -2,11 +2,11 @@
 # todo/cli.py
 
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 
 import typer
 
-from todo import ERRORS, __app_name__, __version__, config, database
+from todo import ERRORS, __app_name__, __version__, config, database, todo
 
 app = typer.Typer()
 
@@ -40,7 +40,52 @@ def init(
             fg=typer.colors.GREEN                                               # sets the success message color to green
         )
 
-def _version_callback(value: bool) -> None:
+def get_todoer() -> todo.Todoer:
+    if config.CONFIG_FILE_PATH.exists():                                        # checks if applications configuration file exists. Path.exists() method used
+        db_path = database.get_database_path(config.CONFIG_FILE_PATH)           # if exists the path to the database is retrieved
+    else:
+        typer.secho(
+            'Config file not found. Please run "todo init"',
+            fg=typer.colors.RED,
+        )
+        raise typer.Exit(1)
+    if db_path.exists():                                                        # check if the path to database exists
+        return todo.Todoer(db_path)                                             # if exists an instance of Todoer is created with argument as the retrieved path
+    else:
+        typer.secho(
+            'Database not found. Please run "todo init"',
+            fg=typer.colors.RED,
+        )
+        raise typer.Exit(1)
+
+@app.command()
+def add(                                                                        # defines .add() as a Typer command using the @app.comand() decorator
+    description: List[str] = typer.Argument(...),                               # defines description as an argument to add(). This argument holds a list of strings representing a to-do description. To build the argument, typer.Argument is used. When an ellipsis (...) is passed as the first argument to the constructor of Argument, it tells Typer that description is required. The fact that this argument is required means that the user must provide a to-do description at the command line
+    priority: int = typer.Option(                                               # defines priority as a Typer option with a default value of 2. The option names are --priority and -p. Priority only accepts three possible values: 1, 2, or 3. To guarantee this condition, min is set to 1 and max is set to 3. This way, Typer automatically validates the user’s input and only accepts numbers within the specified interval.
+        2,
+        "--priority",
+        "-p",
+        min=1,
+        max=3,
+        )
+    ) -> None:
+    """Add a new to-do with a description"""
+    todoer = get_todoer()                                                       # gets a Todoer instance to be used
+    todo, error = todoer.add(description, priority)                             # calls .add() on todoer and unpacks the result into todo and error.
+    if error:                                                                   # error handling
+        typer.secho(
+            f'Adding to-do failed with "{ERRORS[error]}"',
+            fg=typer.colors.RED,
+        )
+        raise typer.Exit(1)
+    else:
+        typer.secho(
+            f"""to-do: "{todo['Description']}" was added """
+            f"""with priority: {priority}""",
+            fg=typer.colors.GREEN,
+        )
+
+def _version_callback(value: bool) -> None:                                     # takes boolean argument value. If value is true then function prints the appliaction name and version.
     if(value):
         typer.echo(f"{__app_name__} v{__version__}")
         raise typer.Exit()
