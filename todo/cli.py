@@ -16,7 +16,7 @@ def init(
         str(database.DEFAULT_DB_FILE_PATH), 
         "--db-path",                                                            # command-line name of option to be follwed by database path
         "-db",                                                                  # command-line name of option to be follwed by database path
-        prompt="Enter To-Do List database location"                             # the prompt argument displays a prompt asking for a database location. It also allows you to accept the default path by pressing Enter
+        prompt="Enter To-Do List database location"                             # the prompt argument displays a prompt asking for a database location. It also allows the user to accept the default path by pressing Enter
     ),
 ) -> None:
     """Initialize the to-do database"""
@@ -82,6 +82,59 @@ def add(                                                                        
         typer.secho(
             f"""to-do: "{todo['Description']}" was added """
             f"""with priority: {priority}""",
+            fg=typer.colors.GREEN,
+        )
+        
+@app.command(name="list")                                                       # define list_all() as a typer command. The name argument sets a custom name for the command which is "list" here. 
+def list_all() -> None:                                                         # Note.: list_all() doesnt take any argument or option. It just lists the to-dos.
+    """List all To-Dos"""
+    todoer = get_todoer()                                                       # gets the Todoer instance
+    todo_list = todoer.get_todo_list()                                          # gets the to-do list from the database by calling .get_too_list() on todoer
+    if len(todo_list) == 0:                                                     # define a conditional statement to check if there’s at least one to-do in the list. If not, then the if code block prints an error message to the screen and exits the application
+        typer.secho(
+            "There are no tasks in the to-do list yet",
+            fg=typer.colors.RED,
+        )
+        raise typer.Exit()
+    typer.secho(
+        "\nTo-Do List:\n",                                                      # prints the header to present the to-do list
+        fg=typer.colors.BLUE,
+        bold=True,                                                              # makes text BOLD
+    )
+    columns = (                                                                 # print the required columns to display the to-do list in a tabular format
+        "ID. ",
+        "| Priority ",
+        "| Done ",
+        "| Description ",
+    )
+    headers = "".join(columns)
+    typer.secho(headers, fg=typer.colors.BLUE, bold=True)
+    typer.secho("-" * len(headers), fg=typer.colors.BLUE)
+    for id, todo in enumerate(todo_list, 1):                                    # run a for loop to print every single to-do on its own row with appropriate padding and separators
+        desc, priority, done = todo.values()
+        typer.secho(
+            f"{id}{(len(columns[0]) - len(str(id))) * ' '}"
+            f"| ({priority}){(len(columns[1]) - len(str(priority)) - 4) * ' '}"
+            f"| {done}{(len(columns[2]) - len(str(done)) - 2) * ' '}"
+            f"| {desc}",
+            fg=typer.colors.BLUE,
+        )
+    typer.secho("-" * len(headers) + "\n", fg=typer.colors.BLUE)                # prints a line of dashes with a final line feed character (\n) to visually separate the to-do list from the next command-line prompt
+
+@app.command(name="complete")                                                   # define set_done() as a Typer command with name = "complete"
+def set_done(todo_id: int =typer.Argument(...)) -> None:                        # set_done() function takes an argument called todo_id, which defaults to an instance of typer.Argument. This instance will work as a required command-line argument
+    """Complete a to-do by setting it as done using corresponding todo_id"""
+    todoer = get_todoer()                                                       # gets the todoer instance
+    todo, error = todoer.set_done(todo_id)                                      # sets the to-do with the specific todo_id as done by calling .set_done() on todoer
+    if error:                                                                   # checks for any error occurs during the process
+        typer.secho(
+            f'Completing to-do # "{todo_id}" failed with "{ERRORS[error]}"',
+            fg=typer.colors.RED,
+        )
+        raise typer.Exit(1)
+    else:
+        typer.secho(
+            f"""todo # {todo_id}"{todo['Description']}" completed!""",
             fg=typer.colors.GREEN,
         )
 
