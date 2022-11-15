@@ -288,7 +288,7 @@ def sort_list(
         )
     typer.secho("-" * len(headers) + "\n", fg=typer.colors.BLUE)                # prints a line of dashes with a final line feed character (\n) to visually separate the to-do list from the next command-line prompt
 
-@app.command(name="complete")                                                   # define set_done() as a Typer command with name = "complete"
+@app.command(name="mark_done")                                              # define set_done() as a Typer command with name = "complete"
 def set_done(todo_id: int =typer.Argument(...)) -> None:                        # set_done() function takes an argument called todo_id, which defaults to an instance of typer.Argument. This instance will work as a required command-line argument
     """Complete a to-do by setting it as done using corresponding todo_id"""
     todoer = get_todoer()                                                       # gets the todoer instance
@@ -305,7 +305,7 @@ def set_done(todo_id: int =typer.Argument(...)) -> None:                        
             fg=typer.colors.GREEN,
         )
 
-@app.command(name="incomplete")                                                 # define set_undone() as a Typer command with name = "complete"
+@app.command(name="mark_undone")                                                 # define set_undone() as a Typer command with name = "complete"
 def set_undone(todo_id: int =typer.Argument(...)) -> None:                      # set_undone() function takes an argument called todo_id, which defaults to an instance of typer.Argument. This instance will work as a required command-line argument
     """Complete a to-do by setting it as done using corresponding todo_id"""
     todoer = get_todoer()                                                       # gets the todoer instance
