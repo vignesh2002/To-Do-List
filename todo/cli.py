@@ -67,8 +67,8 @@ def add(                                                                        
         "-p",
         min=1,
         max=3,
-        )
-    ) -> None:
+    )
+) -> None:
     """Add a new to-do with a description"""
     todoer = get_todoer()                                                       # gets a Todoer instance to be used
     todo, error = todoer.add(description, priority)                             # calls .add() on todoer and unpacks the result into todo and error.
@@ -87,18 +87,18 @@ def add(                                                                        
         
 @app.command(name="list")                                                       # define list_all() as a typer command. The name argument sets a custom name for the command which is "list" here. 
 def list_all(
-    order: str = typer.Option(                                                  # defines priority as a Typer option with a default value of 2. The option names are --priority and -p. Priority only accepts three possible values: 1, 2, or 3. To guarantee this condition, min is set to 1 and max is set to 3. This way, Typer automatically validates the user’s input and only accepts numbers within the specified interval.
+    order: str = typer.Option(                                                  # defines order as a Typer option with a default value of "old_to_new". The option names are --order and -o. Order only accepts two possible values: "old_to_new" or "new_to_old". 
         "old_to_new",
         "--order",
         "-o",
         help="The order of listing i.e. oldest to newest or newest to oldest",
-        )
-    ) -> None:                                                                  # Note.: list_all() doesnt take any argument or option. It just lists the to-dos.
+    )
+) -> None:
     """List all To-Dos"""
     todoer = get_todoer()                                                       # gets the Todoer instance
     todo_list = todoer.get_todo_list()                                          # gets the to-do list from the database by calling .get_too_list() on todoer
-    if order == "new_to_old":
-        todo_list.reverse()
+    if order == "new_to_old":                                                   # checks if the option has value "new_to_old". If True then it reverses the todo_list to display the list in the newest todo to the oldest todo fashion.
+        todo_list.reverse()                                                     # .reverse() is used to reverse the todo_list in place.            
     
     if len(todo_list) == 0:                                                     # define a conditional statement to check if there’s at least one to-do in the list. If not, then the if code block prints an error message to the screen and exits the application
         typer.secho(
@@ -133,13 +133,13 @@ def list_all(
 
 @app.command(name="search")                                                     # define search() as a typer command. The name argument sets a custom name for the command which is "search" here. 
 def search(
-    description: str = typer.Option(                                            # defines desc as a Typer option with a default value of False. The option names are --text and -t. 
+    description: str = typer.Option(                                            # defines description as a Typer option with a default value of False. The option names are --text and -t. 
         False,
         "--text",
         "-t",
         help="Search based on to-do text description",
         ),
-    p: int = typer.Option(                                                      # defines p as a Typer option with a default value of 2. The option names are --priority and -p. Priority only accepts three possible values: 1, 2, or 3. To guarantee this condition, min is set to 1 and max is set to 3. This way, Typer automatically validates the user’s input and only accepts numbers within the specified interval.
+    p: int = typer.Option(                                                      # defines p as a Typer option with a default value of False. The option names are --priority and -p. Priority only accepts four possible values: 0, 1, 2, or 3. To guarantee this condition, min is set to 0 and max is set to 3. This way, Typer automatically validates the user’s input and only accepts numbers within the specified interval.
         False,
         "--priority",
         "-p",
@@ -152,8 +152,8 @@ def search(
         "--index",
         "-i",
         help="Search based on to-do index value",
-        )
-    ) -> None:
+    )
+) -> None:
     """Search Value in To-Do List"""
     todoer = get_todoer()                                                       # gets the Todoer instance
     todo_list = todoer.get_todo_list()                                          # gets the to-do list from the database by calling .get_too_list() on todoer
@@ -179,10 +179,10 @@ def search(
     headers = "".join(columns)
     typer.secho(headers, fg=typer.colors.BLUE, bold=True)
     typer.secho("-" * len(headers), fg=typer.colors.BLUE)
-    if (description and p and index):
-        for id, todo in enumerate(todo_list, 1):                                # run a for loop to print every single to-do on its own row with appropriate padding and separators
+    if (description and p and index):                                           # checks for the condition where all three options --description, --priority, --index are used together using the logical 'and' operator
+        for id, todo in enumerate(todo_list, 1):                                # run a for loop to print every single to-do that satisfiest the following condition on its own row with appropriate padding and separators
             desc, priority, done = todo.values()
-            if (desc == description and p == priority and index == id):
+            if (desc == description and p == priority and index == id):         # searches in the todo_list using todo.values() the values of the description, priority and index entered by the user are typer arguments and checks if all three conditions are met if yes then prints the todo
                 flag = True
                 typer.secho(
                     f"{id}{(len(columns[0]) - len(str(id))) * ' '}"
@@ -197,9 +197,9 @@ def search(
             "Entered To-Do Doesn't Exist",
             fg=typer.colors.RED,
             )
-    elif ((description and p) or (p and index) or (description and index)):
+    elif ((description and p) or (p and index) or (description and index)):     # checks for all the combinations of conditions where pairs of two of the three options --description, --priority, --index are used together using the logical 'or' & 'and' operator
         for id, todo in enumerate(todo_list, 1):                                # run a for loop to print every single to-do on its own row with appropriate padding and separators
-            desc, priority, done = todo.values()
+            desc, priority, done = todo.values()                                # the next line searches in the todo_list using todo.values() the values of the description, priority and index entered by the user are typer arguments and checks if one of the three 'or' conditions are met if yes then prints the todo
             if ((desc == description and p == priority) or ( p == priority and index == id) or (desc == description and index == id)):
                 flag = True
                 typer.secho(
@@ -215,10 +215,10 @@ def search(
             "Entered To-Do Doesn't Exist",
             fg=typer.colors.RED,
             )
-    elif description or p or index:
+    elif description or p or index:                                             # checks for the condition where on of the three options --description, --priority, --index are used using the logical 'or' operator
         for id, todo in enumerate(todo_list, 1):                                # run a for loop to print every single to-do on its own row with appropriate padding and separators
             desc, priority, done = todo.values()
-            if (desc == description or p == priority or index == id):
+            if (desc == description or p == priority or index == id):           # searches in the todo_list using todo.values() the values of the description, priority and index entered by the user are typer arguments and checks if one of the three 'or' conditions are met if yes then prints the todo
                 flag = True
                 typer.secho(
                     f"{id}{(len(columns[0]) - len(str(id))) * ' '}"
@@ -239,22 +239,22 @@ def search(
             fg=typer.colors.RED,
         )       
 
-@app.command(name="sort")                                                       # define sort_list_all() as a typer command. The name argument sets a custom name for the command which is "sort" here. 
-def sort_list_all(
-    order: str = typer.Option(                                                  # defines priority as a Typer option with a default value of 2. The option names are --priority and -p. Priority only accepts three possible values: 1, 2, or 3. To guarantee this condition, min is set to 1 and max is set to 3. This way, Typer automatically validates the user’s input and only accepts numbers within the specified interval.
+@app.command(name="sort")                                                       # define sort_list() as a typer command. The name argument sets a custom name for the command which is "sort" here. 
+def sort_list(
+    order: str = typer.Option(                                                  # defines order as a Typer option with a default value of "asc". The option names are --order and -o. Order only accepts two possible values: "asc" and "des".
         "asc",
         "--order",
         "-o",
         help="The order of sorting i.e. ascending or descending",
-        )
-    ) -> None:                                                                  # Note.: sort_list_all() doesnt take any argument or option. It just lists the sorted order of to-dos in decreasing order of priority.
+    )
+) -> None:
     """List sorted To-Do List"""
     todoer = get_todoer()                                                       # gets the Todoer instance
     todo_list = todoer.get_todo_list()                                          # gets the to-do list from the database by calling .get_too_list() on todoer
     
-    if order == "asc":
+    if order == "asc":                                                          # checks the order value for "asc". If True then it sorts the list in ascending priority value order. Note.: Ascending order of priority value actually means highest priority to lowest priority.
         todo_list = sorted(todo_list, key=lambda td:td["Priority"], reverse=False)
-    elif order == "des":
+    elif order == "des":                                                        # checks the order value for "des". If True then it sorts the list in descending priority value order. Note.: Descending order of priority value actually means lowest priority to highest priority.
         todo_list = sorted(todo_list, key=lambda td:td["Priority"], reverse=True) 
                                                   
     if len(todo_list) == 0:                                                     # define a conditional statement to check if there’s at least one to-do in the list. If not, then the if code block prints an error message to the screen and exits the application
@@ -305,8 +305,8 @@ def set_done(todo_id: int =typer.Argument(...)) -> None:                        
             fg=typer.colors.GREEN,
         )
 
-@app.command(name="incomplete")                                                 # define set_done() as a Typer command with name = "complete"
-def set_done(todo_id: int =typer.Argument(...)) -> None:                        # set_done() function takes an argument called todo_id, which defaults to an instance of typer.Argument. This instance will work as a required command-line argument
+@app.command(name="incomplete")                                                 # define set_undone() as a Typer command with name = "complete"
+def set_undone(todo_id: int =typer.Argument(...)) -> None:                      # set_undone() function takes an argument called todo_id, which defaults to an instance of typer.Argument. This instance will work as a required command-line argument
     """Complete a to-do by setting it as done using corresponding todo_id"""
     todoer = get_todoer()                                                       # gets the todoer instance
     todo, error = todoer.set_undone(todo_id)                                    # sets the to-do with the specific todo_id as done by calling .set_done() on todoer

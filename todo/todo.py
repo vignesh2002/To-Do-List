@@ -15,14 +15,14 @@ class Todoer:                                                                   
     def __init__(self, db_path: Path) -> None:
         self._db_handler = DatabaseHandler(db_path)
 
-    def get_todo_list(self) -> List[Dict[str, Any]]:                                    # .get_todo_list() first gets the entire tod-do list from the database by calling .read_todos() on th e database handler. The call .read_todos() returns a named tuple, DBResponse containing the to-do list and return code. To retrieve only the list, .get_todo_list() returns the .todo_list field only
+    def get_todo_list(self) -> List[Dict[str, Any]]:                                    # .get_todo_list() first gets the entire to-do list from the database by calling .read_todos() on the database handler. The call .read_todos() returns a named tuple, DBResponse containing the to-do list and return code. To retrieve only the list, .get_todo_list() returns the .todo_list field only
         """Return the current To-Do List"""
         read = self._db_handler.read_todos()
         return read.todo_list
 
     def add(self, description: List[str], priority: int = 2) -> CurrentTodo:            # defines .add(), which takes description and priority as arguments. The description is a list of strings. Typer builds this list from the words entered by the user at the command line to describe the current to-do. In the case of priority, it’s an integer value representing the to-do’s priority. The default is 2, indicating a medium priority.
         """Adding a new to-do item to the database"""
-        description_text = " ".join(description)                                        # .join() function is used for
+        description_text = " ".join(description)                                        # .join() function is used for concatenating description components into single string.
         if not description_text.endswith("."):                                          # adds a "." add the end of a descriptor if the user doesn't to maintain uniformity.
             description_text += "."
         todo = {                                                                        # build a new to-do item based on the user input
@@ -37,7 +37,7 @@ class Todoer:                                                                   
         write = self._db_handler.write_todos(read.todo_list)                            # writes the updated to-do list to the database by calling .write_todos() on the database handler
         return CurrentTodo(todo, write.error)                                           # returns an instance of CurrentTodo with the current to-do and an appropriate return code.
 
-    def set_done(self, todo_id: int) -> CurrentTodo:                                    # defines .set_done(). The method takes an argument called todo_id, which holds an integer representing the ID of the to-do to be mark as done.
+    def set_done(self, todo_id: int) -> CurrentTodo:                                    # defines .set_done(). The method takes an argument called todo_id, which holds an integer representing the ID of the to-do to be marked as done.
         """Set a to-do as done"""
         read = self._db_handler.read_todos()                                            # reads all the to-dos by calling .read_todos() on the database handler
         if(read.error):                                                                 # checks if any error occurs during the reading
@@ -50,7 +50,7 @@ class Todoer:                                                                   
         write = self._db_handler.write_todos(read.todo_list)                            # writes the update back to the database by calling .write_todos() on the database handler
         return CurrentTodo(todo, write.error)                                           # returns a CurrentTodo instance with the target to-do and a return code indicating how the operation went
 
-    def set_undone(self, todo_id: int) -> CurrentTodo:                                  # defines .set_done(). The method takes an argument called todo_id, which holds an integer representing the ID of the to-do to be mark as done.
+    def set_undone(self, todo_id: int) -> CurrentTodo:                                  # defines .set_undone(). The method takes an argument called todo_id, which holds an integer representing the ID of the to-do to be marked as undone.
         """Set a to-do as done"""
         read = self._db_handler.read_todos()                                            # reads all the to-dos by calling .read_todos() on the database handler
         if(read.error):                                                                 # checks if any error occurs during the reading
@@ -59,7 +59,7 @@ class Todoer:                                                                   
             todo = read.todo_list[todo_id - 1]
         except IndexError:
             return CurrentTodo({}, ID_ERROR)                                            # returns a CurrentTodo instance with an empty to-do and the corresponding error code
-        todo["Done"] = False                                                            # assigns True to the "Done" key in the target to-do dictionary
+        todo["Done"] = False                                                            # assigns False to the "Done" key in the target to-do dictionary
         write = self._db_handler.write_todos(read.todo_list)                            # writes the update back to the database by calling .write_todos() on the database handler
         return CurrentTodo(todo, write.error)                                           # returns a CurrentTodo instance with the target to-do and a return code indicating how the operation went
 
