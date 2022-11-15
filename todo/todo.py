@@ -50,6 +50,19 @@ class Todoer:                                                                   
         write = self._db_handler.write_todos(read.todo_list)                            # writes the update back to the database by calling .write_todos() on the database handler
         return CurrentTodo(todo, write.error)                                           # returns a CurrentTodo instance with the target to-do and a return code indicating how the operation went
 
+    def set_undone(self, todo_id: int) -> CurrentTodo:                                  # defines .set_done(). The method takes an argument called todo_id, which holds an integer representing the ID of the to-do to be mark as done.
+        """Set a to-do as done"""
+        read = self._db_handler.read_todos()                                            # reads all the to-dos by calling .read_todos() on the database handler
+        if(read.error):                                                                 # checks if any error occurs during the reading
+            return CurrentTodo({}, read.error)                                          # returns a named tuple, CurrentTodo, with an empty to-do and the error
+        try:                                                                            # try...except block to catch invalid to-do IDs that translate to invalid indices in the list.
+            todo = read.todo_list[todo_id - 1]
+        except IndexError:
+            return CurrentTodo({}, ID_ERROR)                                            # returns a CurrentTodo instance with an empty to-do and the corresponding error code
+        todo["Done"] = False                                                            # assigns True to the "Done" key in the target to-do dictionary
+        write = self._db_handler.write_todos(read.todo_list)                            # writes the update back to the database by calling .write_todos() on the database handler
+        return CurrentTodo(todo, write.error)                                           # returns a CurrentTodo instance with the target to-do and a return code indicating how the operation went
+
     def remove(self, todo_id: int) -> CurrentTodo:                                      # defines .remove(). This method takes a to-do ID as an argument and removes the corresponding to-do from the database
         """Remove a To-Do from the database using its id of index"""
         read = self._db_handler.read_todos()                                            # reads the to-do list
